@@ -36,7 +36,7 @@ const NewFightWindow = ({ setWindow }: NewFightWindowProps) => {
 		verifyPicks,
 		submitPicks,
 		submitSwap,
-	} = useInteractionHandler(battleInfo);
+	} = useInteractionHandler(battleInfo, interactionState);
 
 	// When the fight window is mounted and if/when ___ updates, Get an updated T.I.P.
 	useEffect(() => {
@@ -140,6 +140,22 @@ const NewFightWindow = ({ setWindow }: NewFightWindowProps) => {
 	};
 
 	const handleMonsterClick = (teamIndex: number, monsterIndex: number) => {
+		// If the monster is dead, do nothing
+		if (
+			battleInfo?.monsters[teamIndex * battleInfo.monInTeam + monsterIndex]
+				.isDead
+		) {
+			if (interactionState != "Monster") {
+				// Monster is dead here so nothing should happen
+				return;
+			} else {
+				// If the player is picking a monster, set the active monster
+				// console.log("Picking Dead Monster");
+				setActivePlayerMonster(monsterIndex);
+				return;
+			}
+		}
+
 		switch (interactionState) {
 			// If the player is picking a move
 			case "Move":
@@ -148,7 +164,7 @@ const NewFightWindow = ({ setWindow }: NewFightWindowProps) => {
 					setActivePlayerMonster(monsterIndex);
 				} else if (teamIndex == 1) {
 					// If the player is picking the opponent's monster set the active Opponent Monster
-					if (isMonsterSelected(1, monsterIndex)) {
+					if (isMonsterSelected(1, monsterIndex, interactionState)) {
 						setActiveOpponentMonster(undefined);
 					} else {
 						setActiveOpponentMonster(monsterIndex);
@@ -158,14 +174,11 @@ const NewFightWindow = ({ setWindow }: NewFightWindowProps) => {
 					console.error("Invalid Team Index", teamIndex);
 				}
 				break;
-			// If the player is picking a monster
+			// If the player is picking an alive monster
 			case "Monster":
 				// If the player is picking their monster set the active monster
-				if (teamIndex == 0) {
-					if (battleInfo?.monsters[monsterIndex].isDead)
-						setActivePlayerMonster(monsterIndex);
-				} else if (teamIndex == 1) {
-					// If the player is picking the opponent's monster do nothing
+				if (teamIndex == 0 || teamIndex == 1) {
+					// Do nothing as an alive monster is not the correct choice
 					break;
 				} else {
 					// If the player is picking an invalid team, log an error
@@ -310,6 +323,7 @@ const NewFightWindow = ({ setWindow }: NewFightWindowProps) => {
 						case "TIP: Paused (Self)": // The user has a dead monster
 							// When it's paused by the user, we should be in the monster state
 							if (interactionState != "Monster") {
+								console.log("Paused (Self) and setting to Monster");
 								setInteractionState("Monster");
 							}
 							return false;
@@ -317,6 +331,7 @@ const NewFightWindow = ({ setWindow }: NewFightWindowProps) => {
 							// console.log("Paused");
 							// When it's paused by the AI, we should be in the wait state
 							if (interactionState != "Wait") {
+								console.log("Paused and setting to Wait");
 								setInteractionState("Wait");
 
 								// when the AI is paused, we need to update the battleInfo to the current state
@@ -325,6 +340,7 @@ const NewFightWindow = ({ setWindow }: NewFightWindowProps) => {
 								requestTIP(newController)
 									.then((res) => {
 										if (res) {
+											console.log("Paused and updating battleInfo");
 											setBattleInfo(res);
 										}
 									})
@@ -347,28 +363,30 @@ const NewFightWindow = ({ setWindow }: NewFightWindowProps) => {
 							// console.log("New"); // Something has gone wrong as this should not be returned
 							// When it's new, we should be in the move state
 							if (interactionState != "Move") {
+								console.log("New and setting to Move");
 								setInteractionState("Move");
 							}
 							return false;
 						case "TIP: Simulating":
-						// console.log("Simulating");
+							console.log("Simulating");
 						// When it's simulating, we should be in the wait state
 						case "TIP: Waiting":
-						// console.log("Waiting");
+							console.log("Waiting");
 						// When it's waiting, we should be in the wait state
 						case "TIP: Resume":
 							// When it's resume, we should be in the wait state
 							if (interactionState != "Wait") {
+								console.log("Resume and setting to Wait");
 								setInteractionState("Wait");
 							}
 							return true;
 						case "TIP: Complete":
-							// console.log("Complete");
+							console.log("Complete");
 							// When it is complete we should go to the move state
 							setInteractionState("Move");
 							return false;
 						case "TIP: End":
-							// console.log("End");
+							console.log("End");
 							// When it is the end we should set the window to the results window
 							setWindow("Results");
 							return false;
@@ -393,6 +411,16 @@ const NewFightWindow = ({ setWindow }: NewFightWindowProps) => {
 			});
 	};
 
+	const handleIsValid = (teamIndex: number, monsterIndex: number) => {
+		// If the interaction state is monster, invert isValid for the player's team
+		if (interactionState == "Monster") {
+			if (teamIndex == 0) return battleInfo.monsters[monsterIndex].isDead;
+		}
+		// Otherwise, return the normal isValid
+		return !battleInfo.monsters[teamIndex * battleInfo.monInTeam + monsterIndex]
+			.isDead;
+	};
+
 	// Otherwise, return the fight window
 	return (
 		<div className="d-flex flex-row">
@@ -412,12 +440,15 @@ const NewFightWindow = ({ setWindow }: NewFightWindowProps) => {
 								{team.map((monster, monsterIndex) => (
 									<MonsterDisplayBox
 										monster={monster}
-										isValid={!monster.isDead}
+										isValid={handleIsValid(teamIndex, monsterIndex)}
 										key={monsterIndex}
-										isSelected={isMonsterSelected(teamIndex, monsterIndex)}
+										isSelected={isMonsterSelected(
+											teamIndex,
+											monsterIndex,
+											interactionState
+										)}
 										onClick={() => {
-											if (!monster.isDead)
-												handleMonsterClick(teamIndex, monsterIndex);
+											handleMonsterClick(teamIndex, monsterIndex);
 										}}
 									/>
 								))}

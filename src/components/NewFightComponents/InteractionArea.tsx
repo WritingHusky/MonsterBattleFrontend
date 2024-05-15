@@ -63,10 +63,10 @@ const InteractionArea = ({
 					className="border d-flex flex-row justify-content-center align-items-center flex-shrink-1"
 					style={{ height: "35vh" }}
 				>
-					{activeMonsterMovesR?.map((move, index) => (
-						<>
-							{/* Only show the first 4 moves (i.e. hidde the swap move) */}
-							{index < 4 && (
+					{activeMonsterMovesR?.map(
+						(move, index) =>
+							/* Only show the first 4 moves (i.e. hidde the swap move) */
+							index < 4 && (
 								<MoveDisplayBox
 									move={move}
 									key={index}
@@ -79,9 +79,8 @@ const InteractionArea = ({
 										}
 									}}
 								/>
-							)}
-						</>
-					))}
+							)
+					)}
 					<div
 						className="btn btn-secondary"
 						onClick={() => submitPicks(battleInfo)}
@@ -101,24 +100,23 @@ const InteractionArea = ({
 						Please select a monster to switch out of the battle
 					</div>
 					<div className="d-flex flex-row justify-content-center align-items-center flex-shrink-1 flex-wrap">
-						{battleInfo.monsters.map((monster, index) => (
-							<>
-								{index < battleInfo.monInTeam &&
-									index >= battleInfo.activeMon && (
-										<MonsterDisplayBox
-											monster={monster}
-											key={index}
-											isValid={isValid(index)}
-											isSelected={selectedMonsterSwapIndex === index}
-											onClick={() => {
-												if (isValid(index)) {
-													handleMonsterClick(index);
-												}
-											}}
-										/>
-									)}
-							</>
-						))}
+						{battleInfo.monsters.map(
+							(monster, index) =>
+								index < battleInfo.monInTeam &&
+								index >= battleInfo.activeMon && (
+									<MonsterDisplayBox
+										monster={monster}
+										key={index}
+										isValid={isValid(index)}
+										isSelected={selectedMonsterSwapIndex === index}
+										onClick={() => {
+											if (isValid(index)) {
+												handleMonsterClick(index);
+											}
+										}}
+									/>
+								)
+						)}
 					</div>
 					<button
 						className="btn btn-secondary w-50 mt-2"
@@ -129,7 +127,14 @@ const InteractionArea = ({
 				</div>
 			);
 		case "Wait": // This is the state where the player is waiting for whatever reason
-			return <div>Waiting</div>;
+			return (
+				<div
+					className="border d-flex flex-column justify-content-center align-items-center gap-2"
+					style={{ height: "35vh" }}
+				>
+					Waiting
+				</div>
+			);
 		case undefined: // Semi error state where no interaction is defined. This should never happen
 			console.log("InteractionArea.tsx: interaction is undefined");
 			return <div>Undefined</div>;

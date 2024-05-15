@@ -8,15 +8,74 @@ Note: ___R variables are variables that are updated in response to changes in ot
 
 // This hook will handle the interaction between the player and the game in terms of move and monster choices
 const useInteractionHandler = (
-	battlefieldInfo: battlefieldInfo | undefined
+	battlefieldInfo: battlefieldInfo | undefined,
+	interactionState: string
 ) => {
 	const { getuserToken } = useToken();
 	const { getBattleId } = useBatelId();
 
+	// Might add a useEffect [] to reset the states when the battlefieldInfo changes
+	// This might fix the bug of the selected move not being reset when the battlefield changes
+	useEffect(() => {
+		// If the battlefieldInfo is undefined, do nothing
+		if (battlefieldInfo == undefined) return;
+
+		// Welcome to if-statement hell
+
+		// If the player is picking a monster then pick the first dead monster
+		if (interactionState === "Monster") {
+			// loop through the monsters and set the activePlayerMonster to the first dead monster
+			for (let i = 0; i < battlefieldInfo.activeMon; i++) {
+				if (battlefieldInfo.monsters[i].isDead) {
+					// console.log("Setting Active Player Monster to: ", i);
+					setActivePlayerMonster(i);
+					break;
+				}
+			}
+		} else if (interactionState === "Move") {
+			// If the player is picking a move, pick the first alive monster
+			// loop through the monsters and set the activePlayerMonster to the first alive monster
+			for (let i = 0; i < battlefieldInfo.activeMon; i++) {
+				if (!battlefieldInfo.monsters[i].isDead) {
+					// console.log("Setting Active Player Monster to: ", i);
+					setActivePlayerMonster(i);
+					break;
+				}
+			}
+		} else {
+			// If the player is in any other state, don't change the activePlayerMonster
+		}
+
+		// If the monster at 0 is dead, set the activePlayerMonster to the next available monster
+		if (battlefieldInfo.monsters[0].isDead) {
+			// loop through the monsters and set the activePlayerMonster to the first alive monster
+			for (let i = 1; i < battlefieldInfo.activeMon; i++) {
+				if (!battlefieldInfo.monsters[i].isDead) {
+					setActivePlayerMonster(i);
+					break;
+				}
+			}
+			// If the game is over, return as this doesn't matter
+			if ((battlefieldInfo.state = "End")) {
+				return;
+			}
+		} else {
+			// If the monster at 0 is alive, set the activePlayerMonster to 0
+			setActivePlayerMonster(0);
+		}
+
+		setPickedOpponentMonstersR([]);
+		setActiveOpponentMonster(undefined);
+		setPickedMovesR([]);
+		setSelectedMonsterMoveIndex(undefined);
+		setPickedSwapR([]);
+		setSelectedMonsterSwapIndex(undefined);
+	}, [battlefieldInfo]);
+
 	//#region Player Monster Choice
 
 	// Player choice state
-	const [activePlayerMonster, setActivePlayerMonster] = useState<number>(0); // The index of the monster the actvive player is using
+	const [activePlayerMonster, setActivePlayerMonster] = useState<number>(); // The index of the monster the actvive player is using
 	const [activeMonsterMovesR, setActiveMonsterMovesR] =
 		useState<MonsterMove[]>();
 
@@ -24,6 +83,11 @@ const useInteractionHandler = (
 	useEffect(() => {
 		// If the battlefieldInfo is undefined, do nothing
 		if (battlefieldInfo == undefined) return;
+		// If the activePlayerMonster is undefined, set the activeMonsterMoves to undefined
+		if (activePlayerMonster == undefined) {
+			setActiveMonsterMovesR(undefined);
+			return;
+		}
 		// Get the active monster from the battlefieldInfo
 		const activeMonster = battlefieldInfo.monsters[activePlayerMonster];
 		// Set the activeMonsterMoves
@@ -32,13 +96,26 @@ const useInteractionHandler = (
 
 	// When the activePlayerMonster changes, check if the monster has a chosen move and if it does, set the selectedMonsterMoveIndex to that move
 	useEffect(() => {
+		// If the activePlayerMonster is undefined, set the selected move to undefined
+		if (activePlayerMonster == undefined) {
+			setSelectedMonsterMoveIndex(undefined);
+			return;
+		}
+		// If the player has picked a move for the monster, set it
 		if (pickedMovesR[activePlayerMonster] != undefined) {
 			setSelectedMonsterMoveIndex(pickedMovesR[activePlayerMonster] as number);
+		} else {
+			// Otherwise, reset the selected move
+			setSelectedMonsterMoveIndex(undefined);
 		}
+		// If the player has picked an opponent monster for the activePlayerMonster, set it
 		if (pickedOpponentMonstersR[activePlayerMonster] != undefined) {
 			setActiveOpponentMonster(
 				pickedOpponentMonstersR[activePlayerMonster] as number
 			);
+		} else {
+			// Otherwise, reset the selected opponent monster
+			setActiveOpponentMonster(undefined);
 		}
 	}, [activePlayerMonster]);
 
@@ -54,6 +131,12 @@ const useInteractionHandler = (
 
 	// When the activeOpponentMonster changes, update the pickedOpponentMonsters to save the picked monster
 	useEffect(() => {
+		// If the activeOpponentMonster is undefined, set the pickedOpponentMonsters to undefined
+		if (activePlayerMonster == undefined) {
+			setPickedOpponentMonstersR([]);
+			return;
+		}
+
 		// Copy over the pickedOpponentMonsters
 		let newPickedOpponentMonsters = [...pickedOpponentMonstersR];
 
@@ -81,6 +164,11 @@ const useInteractionHandler = (
 
 	// When the activeMonsterMoveIndex changes, update the pickedMoves to save the picked move
 	useEffect(() => {
+		// If the activePlayerMonster is undefined, set the pickedMoves to undefined
+		if (activePlayerMonster == undefined) {
+			setPickedMovesR([]);
+			return;
+		}
 		// Copy over the pickedMoves
 		let newPickedMoves = [...pickedMovesR];
 
@@ -104,6 +192,12 @@ const useInteractionHandler = (
 
 	// When the selectedMonsterSwapIndex changes, update the pickedSwap to save the picked swap
 	useEffect(() => {
+		// If the activePlayerMonster is undefined, set the pickedSwap to undefined
+		if (activePlayerMonster == undefined) {
+			setPickedSwapR([]);
+			return;
+		}
+
 		let newPickedSwap = [...pickedSwapR];
 
 		if (selectedMonsterSwapIndex == undefined) {
@@ -115,6 +209,8 @@ const useInteractionHandler = (
 		setPickedSwapR(newPickedSwap);
 	}, [selectedMonsterSwapIndex]);
 
+	//#endregion
+
 	//#region Relevent Functions
 	// This function will return if move is picked or not
 	const isMovePicked = (moveIndex: number) => {
@@ -124,13 +220,38 @@ const useInteractionHandler = (
 		// 	moveIndex,
 		// 	pickedMovesR[activePlayerMonster] === moveIndex
 		// );
+		if (activePlayerMonster === undefined) {
+			return false;
+		}
 		return pickedMovesR[activePlayerMonster] === moveIndex;
 	};
 
-	const isMonsterSelected = (teamIndex: number, monsterIndex: number) => {
+	const isMonsterSelected = (
+		teamIndex: number,
+		monsterIndex: number,
+		interactionState: string
+	) => {
+		// If the activePlayerMonster is undefined, return false
+		if (activePlayerMonster === undefined) {
+			return false;
+		}
+		// If the monster is dead they cannot be selected
+		if (
+			battlefieldInfo?.monsters[
+				teamIndex * battlefieldInfo.monInTeam + monsterIndex
+			].isDead
+		) {
+			if (interactionState != "Monster") {
+				return false;
+			}
+		}
+
+		// Otherwise, check if the monster is selected
 		switch (teamIndex) {
+			// Player's team
 			case 0:
 				return monsterIndex == activePlayerMonster;
+			// Opponent's team
 			case 1:
 				return pickedOpponentMonstersR[activePlayerMonster] === monsterIndex;
 			default:
@@ -162,6 +283,11 @@ const useInteractionHandler = (
 			monsterIndex < battleInfo.activeMon;
 			monsterIndex++
 		) {
+			// If the monster is dead, skip it
+			if (battleInfo.monsters[monsterIndex].isDead) {
+				continue;
+			}
+
 			// If an opponent or move are not picked, return false
 			if (
 				pickedOpponentMonstersR[monsterIndex] == undefined ||
@@ -190,6 +316,11 @@ const useInteractionHandler = (
 		// console.log("Submitting Picks");
 		//Submit the picks to the server
 		for (let i of Array.from({ length: battleInfo.activeMon }, (_, i) => i)) {
+			// If the monster is dead, skip it and dont submit a move for it
+			if (battleInfo.monsters[i].isDead) {
+				continue;
+			}
+
 			const sourceSlot = battleInfo.monsters[i].slot;
 			const targetSlot =
 				battleInfo.monsters[
@@ -223,9 +354,18 @@ const useInteractionHandler = (
 		controller: AbortController
 	) => {
 		// If there is no selectedMonsterSwapIndex, return
-		if (selectedMonsterSwapIndex === undefined) {
+		if (
+			selectedMonsterSwapIndex === undefined ||
+			activePlayerMonster === undefined
+		) {
 			return false;
 		}
+		// If the monster is alive the swap is not valid
+		if (!battleInfo.monsters[activePlayerMonster].isDead) {
+			// console.log("Monster is not dead");
+			return false;
+		}
+
 		const userId = getuserToken();
 		const battleId = getBattleId();
 		await handleMoveSubmit(
