@@ -1,12 +1,14 @@
 interface MonsterDisplayBoxProp {
 	monster: monsterInfo;
 	isSelected: boolean | undefined;
+	isValid: boolean;
 	onClick: () => void;
 }
 const MonsterDisplayBox = ({
 	monster,
 	isSelected,
 	onClick,
+	isValid,
 }: MonsterDisplayBoxProp) => {
 	const healthNumber = parseFloat(
 		((monster.currentHp / monster.maxHp) * 100).toFixed(1)
@@ -18,8 +20,18 @@ const MonsterDisplayBox = ({
 	else if (healthNumber > 25) healthcolor = "yellow";
 	else healthcolor = "red";
 
-	const backgroundColor = "#FFD4A8";
+	let backgroundColor = "#FFD4A8";
 	const selectedBackgroundColor = "#CC7F32";
+
+	let setColor;
+
+	if (!isValid) {
+		setColor = "#96928d";
+	} else if (isSelected) {
+		setColor = selectedBackgroundColor;
+	} else {
+		setColor = backgroundColor;
+	}
 
 	return (
 		<div
@@ -29,8 +41,8 @@ const MonsterDisplayBox = ({
 				minWidth: "120px",
 				minHeight: "100px",
 				maxHeight: "250px",
-				fontSize: "0.8rem",
-				backgroundColor: isSelected ? selectedBackgroundColor : backgroundColor,
+				fontSize: "min(1.3vw, 0.8rem)",
+				backgroundColor: setColor,
 			}}
 			onClick={onClick}
 		>

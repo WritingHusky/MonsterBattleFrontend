@@ -29,11 +29,13 @@ const NewFightWindow = ({ setWindow }: NewFightWindowProps) => {
 		setPickedMovesR,
 		setPickedOpponentMonstersR,
 		setActiveOpponentMonster,
+		selectedMonsterSwapIndex,
+		setSelectedMonsterSwapIndex,
 		isMovePicked,
 		isMonsterSelected,
-		// isMoveDisabled,
 		verifyPicks,
 		submitPicks,
+		submitSwap,
 	} = useInteractionHandler(battleInfo);
 
 	// When the fight window is mounted and if/when ___ updates, Get an updated T.I.P.
@@ -160,7 +162,8 @@ const NewFightWindow = ({ setWindow }: NewFightWindowProps) => {
 			case "Monster":
 				// If the player is picking their monster set the active monster
 				if (teamIndex == 0) {
-					setActivePlayerMonster(monsterIndex);
+					if (battleInfo?.monsters[monsterIndex].isDead)
+						setActivePlayerMonster(monsterIndex);
 				} else if (teamIndex == 1) {
 					// If the player is picking the opponent's monster do nothing
 					break;
@@ -185,7 +188,7 @@ const NewFightWindow = ({ setWindow }: NewFightWindowProps) => {
 	if (!battleInfo) return <div>Loading...</div>; // TODO: Add a better loading state
 	// So I might do the nothing approach, we'll see
 
-	const handleSubmitPicks = () => {
+	const handleSubmitPicksMoves = () => {
 		// If the picks are not verified, log an error
 		if (!verifyPicks(battleInfo)) {
 			console.error("Picks not verified");
@@ -217,6 +220,54 @@ const NewFightWindow = ({ setWindow }: NewFightWindowProps) => {
 				};
 				// Start the inquiry cycle
 				inquiryCycle();
+
+				setInteractionState("Wait");
+			})
+			.catch((error) => {
+				if (error.response) {
+					// console.log("Submit Picks Failed"); // Debugging
+					controller.abort();
+					console.error(error.response);
+				}
+			});
+
+		//
+	};
+
+	const handleSubmitPicksMonsters = () => {
+		// If verify the picks
+		if (selectedMonsterSwapIndex == undefined) {
+			console.error("No Monster Selected"); // TODO: add an onscreen error message
+			return;
+		}
+		const controller = new AbortController();
+
+		// Submit the picks
+		submitSwap(battleInfo, controller)
+			.then((res) => {
+				if (!res) {
+					console.error("Submit Picks Failed"); // This should not happen as the verifyPicks should catch this
+					return;
+				}
+				// console.log("Picks Submitted"); // Debugging
+				// If the picks are verified, start the inquiry cycle
+				// Define the inquiry cycle
+				const inquiryCycle = async () => {
+					// console.log("Starting Inquiry Cycle"); // Debugging
+					// Send the Inquiry
+					const repeat = await sendInquiry(controller);
+					// If the inquiry should repeat, repeat the inquiry cycle
+					if (repeat) {
+						// console.log("Repeating Inquiry"); // Debugging
+						// Wait for 1 second before sending the next inquiry
+						setTimeout(() => inquiryCycle(), 2000);
+					} else {
+						// console.log("Inquiry Cycle Complete"); // Debugging
+					}
+				};
+				// Start the inquiry cycle
+				inquiryCycle();
+				setInteractionState("Wait");
 			})
 			.catch((error) => {
 				if (error.response) {
@@ -361,9 +412,13 @@ const NewFightWindow = ({ setWindow }: NewFightWindowProps) => {
 								{team.map((monster, monsterIndex) => (
 									<MonsterDisplayBox
 										monster={monster}
+										isValid={!monster.isDead}
 										key={monsterIndex}
 										isSelected={isMonsterSelected(teamIndex, monsterIndex)}
-										onClick={() => handleMonsterClick(teamIndex, monsterIndex)}
+										onClick={() => {
+											if (!monster.isDead)
+												handleMonsterClick(teamIndex, monsterIndex);
+										}}
 									/>
 								))}
 								{teamIndex != 0 && "<- opponent"}
@@ -377,7 +432,10 @@ const NewFightWindow = ({ setWindow }: NewFightWindowProps) => {
 					isMovePicked={isMovePicked}
 					activeMonsterMovesR={activeMonsterMovesR}
 					setSelectedMonsterMoveIndex={setSelectedMonsterMoveIndex}
-					submitPicks={handleSubmitPicks}
+					selectedMonsterSwapIndex={selectedMonsterSwapIndex}
+					setSelectedMonsterSwapIndex={setSelectedMonsterSwapIndex}
+					submitPicks={handleSubmitPicksMoves}
+					submitSwap={handleSubmitPicksMonsters}
 				/>
 			</div>
 			<TextLog />

@@ -14,6 +14,7 @@ const useInteractionHandler = (
 	const { getBattleId } = useBatelId();
 
 	//#region Player Monster Choice
+
 	// Player choice state
 	const [activePlayerMonster, setActivePlayerMonster] = useState<number>(0); // The index of the monster the actvive player is using
 	const [activeMonsterMovesR, setActiveMonsterMovesR] =
@@ -44,6 +45,7 @@ const useInteractionHandler = (
 	//#endregion
 
 	//#region Opponent Monster Choice
+
 	// Opponent choice state
 	const [activeOpponentMonster, setActiveOpponentMonster] = useState<number>(); // The index of the monster the opponent is using
 	const [pickedOpponentMonstersR, setPickedOpponentMonstersR] = useState<
@@ -94,6 +96,24 @@ const useInteractionHandler = (
 		setPickedMovesR(newPickedMoves);
 	}, [selectedMonsterMoveIndex]);
 	//#endregion
+
+	//#region Monster Swap Choice
+	const [selectedMonsterSwapIndex, setSelectedMonsterSwapIndex] =
+		useState<number>();
+	const [pickedSwapR, setPickedSwapR] = useState<(number | undefined)[]>([]);
+
+	// When the selectedMonsterSwapIndex changes, update the pickedSwap to save the picked swap
+	useEffect(() => {
+		let newPickedSwap = [...pickedSwapR];
+
+		if (selectedMonsterSwapIndex == undefined) {
+			newPickedSwap[activePlayerMonster] = undefined;
+		} else {
+			newPickedSwap[activePlayerMonster] = selectedMonsterSwapIndex;
+		}
+
+		setPickedSwapR(newPickedSwap);
+	}, [selectedMonsterSwapIndex]);
 
 	//#region Relevent Functions
 	// This function will return if move is picked or not
@@ -165,11 +185,11 @@ const useInteractionHandler = (
 			// console.error("Picks not verified in interaction handler"); // Debugging
 			return false;
 		}
+		const userId = getuserToken();
+		const battleId = getBattleId();
 		// console.log("Submitting Picks");
 		//Submit the picks to the server
 		for (let i of Array.from({ length: battleInfo.activeMon }, (_, i) => i)) {
-			const userId = getuserToken();
-			const battleId = getBattleId();
 			const sourceSlot = battleInfo.monsters[i].slot;
 			const targetSlot =
 				battleInfo.monsters[
@@ -195,6 +215,27 @@ const useInteractionHandler = (
 			}
 			// console.log("Move Submitted: ", i); // Debugging
 		}
+		return true;
+	};
+
+	const submitSwap = async (
+		battleInfo: battlefieldInfo,
+		controller: AbortController
+	) => {
+		// If there is no selectedMonsterSwapIndex, return
+		if (selectedMonsterSwapIndex === undefined) {
+			return false;
+		}
+		const userId = getuserToken();
+		const battleId = getBattleId();
+		await handleMoveSubmit(
+			userId,
+			battleId,
+			battleInfo.monsters[activePlayerMonster].slot,
+			battleInfo.monsters[selectedMonsterSwapIndex].slot,
+			4,
+			controller
+		);
 		return true;
 	};
 
@@ -264,11 +305,14 @@ const useInteractionHandler = (
 		setActiveOpponentMonster, // Used when opponent monster is selected
 		// pickedOpponentMonstersR,
 		setPickedOpponentMonstersR, // Used to reset the picked opponent monsters
+		selectedMonsterSwapIndex,
+		setSelectedMonsterSwapIndex, // Used when a monster swap is selected
 		isMovePicked, // Used to check if a move is picked
 		isMonsterSelected, // Used to check if a monster is selected
 		isMoveDisabled, // Used to check if a move is disabled
 		verifyPicks, // Used to verify that all picks are made
 		submitPicks, // Used to submit the picks to the server
+		submitSwap, // Used to submit the swap to the server
 	};
 };
 
