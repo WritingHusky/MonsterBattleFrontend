@@ -3,7 +3,7 @@ import BattlePage from "./Pages/BattlePage";
 import MainPage from "./Pages/MainPage";
 import TeamBuilderPage from "./Pages/TeamBuilderPage";
 import useToken from "./components/SignIn/useToken";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import ErrorPage from "./Pages/ErrorPage";
 import handleLogOut from "./components/handleLogOut";
 import useUsername from "./components/SignIn/useUsername";

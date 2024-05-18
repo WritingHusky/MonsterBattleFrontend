@@ -1,10 +1,8 @@
 import { useState } from "react";
 import NavBar from "../components/NavBar";
 import SetUpWindow from "../components/Fight/SetUpWindow";
-import FightWindow from "../components/Fight/FightWindow";
-import BattleId from "../components/useBattleId";
-import useToken from "../components/SignIn/useToken";
 import NewFightWindow from "../components/NewFightComponents/NewFightWindow";
+import ResultsWindow from "../components/ResultsWindow";
 
 interface BattlerProps {
 	setPage: React.Dispatch<React.SetStateAction<string>>;
@@ -21,9 +19,6 @@ Order:
 const BattlePage = ({ setPage: setPage }: BattlerProps) => {
 	//Get them to pick an opponent
 	const [window, setWindow] = useState("Setup");
-	const { getBattleId } = BattleId();
-	const { getuserToken } = useToken();
-
 	// List of information that is need to build match
 
 	/* 
@@ -41,7 +36,7 @@ const BattlePage = ({ setPage: setPage }: BattlerProps) => {
 			{/* {window == "Fight" && (
 				<FightWindow userId={getuserToken()} battleId={getBattleId()} />
 			)} */}
-			{window == "Results" && <div>Results</div>}
+			{window == "Results" && <ResultsWindow setPage={setPage} />}
 		</>
 	);
 };

@@ -59,7 +59,7 @@ const MonsterDisplayBox = ({
 							fontWeight: "normal",
 						}}
 					>
-						{monster.slot}
+						{monster.monsterCode}
 					</div>
 				</div>
 				<div className="progress m-1">

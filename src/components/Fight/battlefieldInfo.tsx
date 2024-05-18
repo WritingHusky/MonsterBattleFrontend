@@ -10,7 +10,7 @@ interface battlefieldInfo {
 	monsterTurnInfoArray: MonsterTurnInfo[];
 
 	turnDisplayList: {
-		displayQ: DisplayElement[];
+		displayList: TurnDisplayElement[];
 	};
 
 	moveOverrides: number[];
@@ -76,10 +76,42 @@ interface MonsterTurnInfo {
 	endMoveEffects: any[]; // Assuming this could be of various types
 }
 
-interface DisplayElement {
-	activationMsg: string;
-	activationSlot: string;
-	resultMsg: string;
-	resultSlot: string;
-	msgCode: number;
+interface TurnDisplayElement {
+	message: string;
+	messageType: string;
+	/*
+	types:
+		Turn Header
+		Context / Message Header
+		Context / Message
+		Move Header
+		Effect
+		Post Effect
+		Ability
+
+	*/
+}
+
+interface messageElement {
+	type: string; // Denotes the type of message
+	/*
+	types:
+		Context / Message Header
+		Context / Message
+		Move Header
+		Effect
+		Post Effect
+		Ability
+
+	*/
+	message: string; // The actual message
+}
+
+interface TurnLogEntry {
+	messageType: string;
+	message: string;
+}
+
+interface TurnLog {
+	TurnLog: TurnLogEntry[];
 }
