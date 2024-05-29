@@ -2,6 +2,7 @@ import axios from "axios";
 import useBattleid from "../useBattleId";
 import useToken from "../SignIn/useToken";
 import { useEffect, useRef, useState } from "react";
+import { GET_LOG_URL } from "../../Constants";
 
 interface TextLogProps {
 	battleInfo: battlefieldInfo;
@@ -12,7 +13,6 @@ const TextLog = ({ battleInfo }: TextLogProps) => {
 	const { getBattleId } = useBattleid();
 
 	const [log, setLog] = useState<TurnLogEntry[]>();
-	const [logLength, setLogLength] = useState<number>(0);
 	const logContainerRef = useRef<HTMLDivElement>(null);
 
 	// Get the Log from the server, when the component is mounted and when the battleInfo changes
@@ -42,14 +42,10 @@ const TextLog = ({ battleInfo }: TextLogProps) => {
 		const battleId = getBattleId();
 
 		return await axios
-			.post(
-				"http://localhost:8080/api/battle/getLog",
-				JSON.stringify({ userId, battleId }),
-				{
-					headers: { "Content-Type": "application/json" },
-					signal: controller.signal,
-				}
-			)
+			.post(GET_LOG_URL, JSON.stringify({ userId, battleId }), {
+				headers: { "Content-Type": "application/json" },
+				signal: controller.signal,
+			})
 			.then((res) => {
 				// Log the entire response data
 				// console.log("Response data: ", res.data);

@@ -2,6 +2,7 @@ import axios from "axios";
 import NavBar from "../components/NavBar";
 import BattleId from "../components/useBattleId";
 import useToken from "../components/SignIn/useToken";
+import { REMOVE_URL } from "../Constants";
 
 interface MainPageProps {
 	setPage: React.Dispatch<React.SetStateAction<string>>;
@@ -19,11 +20,9 @@ const MainPage = ({ setPage }: MainPageProps) => {
 		const userId = getuserToken();
 		const battleId = getBattleId();
 		axios
-			.post(
-				"http://localhost:8080/api/battle/removeBattle",
-				JSON.stringify({ userId, battleId }),
-				{ headers: { "Content-Type": "application/json" } }
-			)
+			.post(REMOVE_URL, JSON.stringify({ userId, battleId }), {
+				headers: { "Content-Type": "application/json" },
+			})
 			.then(() => {
 				// console.log("Battle Removed");
 			})

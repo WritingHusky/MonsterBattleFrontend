@@ -2,6 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import MonsterStatBlock from "./MonsterStatBlock";
 import Monster from "./monster";
+import { RETRIEVE_URL } from "../../Constants";
 
 /* 
 Things to display:
@@ -27,11 +28,9 @@ const TeamMonBar = ({ dexId }: MonBarProps) => {
 	// The method to update the infomation about a monster
 	const retreiveMonInfo = async () => {
 		await axios
-			.post(
-				"http://localhost:8080/api/monster/retrieve",
-				JSON.stringify({ dexId }),
-				{ headers: { "Content-Type": "application/json" } }
-			)
+			.post(RETRIEVE_URL, JSON.stringify({ dexId }), {
+				headers: { "Content-Type": "application/json" },
+			})
 			.then((res) => {
 				// console.log(res.data);
 				setMonster(res.data);

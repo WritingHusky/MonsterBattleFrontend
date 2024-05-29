@@ -1,4 +1,5 @@
 import battleIcon from "../assets/battleIcon.png";
+import infoIcon from "../assets/infoIcon.svg";
 /*
 This component will handle the main logic for switching pages
 */
@@ -26,11 +27,28 @@ const NavBar = ({ setPage, pages }: NavBarProps) => {
 						))}
 					</ul>
 				</nav>
-				<img
-					src={battleIcon}
-					alt="Logo"
-					style={{ width: "auto", height: "50px" }}
-				/>
+
+				<div
+					className="d-flex flex-row justify-content-around align-items-center"
+					style={{}}
+				>
+					<a
+						href="https://writinghusky.github.io/monster-battler/"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						<img
+							src={infoIcon}
+							alt="Info Icon"
+							style={{ width: "auto", height: "50px", marginRight: "70px" }}
+						/>
+					</a>
+					<img
+						src={battleIcon}
+						alt="Logo"
+						style={{ width: "auto", height: "50px" }}
+					/>
+				</div>
 			</div>
 		</>
 	);

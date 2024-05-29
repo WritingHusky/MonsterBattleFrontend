@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import useToken from "../SignIn/useToken";
 import useBatelId from "../useBattleId";
 import axios from "axios";
+import { SEND_MOVE_URL } from "../../Constants";
+
 /*
 Note: ___R variables are variables that are updated in response to changes in other variables.
 */
@@ -19,6 +21,7 @@ const useInteractionHandler = (
 	useEffect(() => {
 		// If the battlefieldInfo is undefined, do nothing
 		if (battlefieldInfo == undefined) return;
+		if (battlefieldInfo.monsters == undefined) return;
 
 		// Welcome to if-statement hell
 
@@ -313,6 +316,9 @@ const useInteractionHandler = (
 		}
 		const userId = getuserToken();
 		const battleId = getBattleId();
+		if (userId === undefined || battleId === undefined) {
+			return false;
+		}
 		// console.log("Submitting Picks");
 		//Submit the picks to the server
 		for (let i of Array.from({ length: battleInfo.activeMon }, (_, i) => i)) {
@@ -368,6 +374,10 @@ const useInteractionHandler = (
 
 		const userId = getuserToken();
 		const battleId = getBattleId();
+		if (userId === undefined || battleId === undefined) {
+			return false;
+		}
+
 		await handleMoveSubmit(
 			userId,
 			battleId,
@@ -390,7 +400,7 @@ const useInteractionHandler = (
 		return (
 			axios
 				.post(
-					"http://localhost:8080/api/battle/sendMove",
+					SEND_MOVE_URL,
 					JSON.stringify({
 						userId,
 						battleId,

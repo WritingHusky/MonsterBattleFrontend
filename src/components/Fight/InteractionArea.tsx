@@ -1,5 +1,5 @@
-import MonsterDisplayBox from "../Fight/MonsterDisplayBox";
-import MoveDisplayBox from "../Fight/MoveDisplayBox";
+import MonsterDisplayBox from "./MonsterDisplayBox";
+import MoveDisplayBox from "./MoveDisplayBox";
 
 interface InteractionAreaProps {
 	interaction: string | undefined;

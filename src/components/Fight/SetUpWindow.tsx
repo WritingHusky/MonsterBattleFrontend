@@ -3,16 +3,15 @@ import OppnentPage from "./OppnentPage";
 import RulesPage from "./RulesPage";
 import axios from "axios";
 import useToken from "../SignIn/useToken";
-import heart from "../heart";
 import BattleId from "../useBattleId";
 import username from "../SignIn/useUsername";
 
 interface SetUpWindowProps {
 	setWindow: React.Dispatch<React.SetStateAction<string>>;
+	startBattleBeating: (new_battleId: string, new_userId: string) => void;
 }
 
-const SetUpWindow = ({ setWindow }: SetUpWindowProps) => {
-	const { startBattleBeating } = heart();
+const SetUpWindow = ({ setWindow, startBattleBeating }: SetUpWindowProps) => {
 	const { getuserToken } = useToken();
 	const [view, setView] = useState("Opp");
 	const [opponent, setOpponent] = useState("Default");
@@ -31,10 +30,13 @@ const SetUpWindow = ({ setWindow }: SetUpWindowProps) => {
 			)
 			.then((res) => {
 				// console.log(res.data);
-
-				startBattleBeating(res.data);
-				setBattleId(res.data);
-				setWindow("Fight");
+				if (userId != undefined) {
+					setBattleId(res.data);
+					startBattleBeating(res.data, userId);
+					setWindow("Fight");
+				} else {
+					console.error("User ID is undefined");
+				}
 			}) //If every thing is good
 			// Looking to recieve a JSON object of the format: { "userID": "..."}
 			.catch((error) => {

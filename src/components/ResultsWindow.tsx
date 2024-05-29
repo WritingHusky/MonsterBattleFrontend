@@ -1,11 +1,11 @@
 import MonsterDisplayBox from "./Fight/MonsterDisplayBox";
-import BattleField from "./NewFightComponents/BattleField";
-import InteractionArea from "./NewFightComponents/InteractionArea";
-import TextLog from "./NewFightComponents/TextLog";
+import BattleField from "./Fight/BattleField";
+import TextLog from "./Fight/TextLog";
 import useBattleid from "./useBattleId";
 import useToken from "./SignIn/useToken";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { RETRIEVE_TIP_URL } from "../Constants";
 
 interface ResultsWindowProps {
 	setPage: React.Dispatch<React.SetStateAction<string>>;
@@ -31,14 +31,10 @@ const ResultsWindow = ({ setPage }: ResultsWindowProps) => {
 		const battleId = getBattleId();
 
 		return await axios
-			.post(
-				"http://localhost:8080/api/battle/retrieveTIP",
-				JSON.stringify({ userId, battleId }),
-				{
-					headers: { "Content-Type": "application/json" },
-					signal: controller.signal,
-				}
-			)
+			.post(RETRIEVE_TIP_URL, JSON.stringify({ userId, battleId }), {
+				headers: { "Content-Type": "application/json" },
+				signal: controller.signal,
+			})
 			.then((res) => {
 				return res.data as battlefieldInfo;
 			})
@@ -121,7 +117,7 @@ const ResultsWindow = ({ setPage }: ResultsWindowProps) => {
 						</button>
 					</div>
 				</div>
-				<TextLog />
+				<TextLog battleInfo={battleInfo} />
 			</div>
 			<style>.module-window {}</style>
 			<div

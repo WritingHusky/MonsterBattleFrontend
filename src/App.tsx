@@ -3,7 +3,7 @@ import BattlePage from "./Pages/BattlePage";
 import MainPage from "./Pages/MainPage";
 import TeamBuilderPage from "./Pages/TeamBuilderPage";
 import useToken from "./components/SignIn/useToken";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ErrorPage from "./Pages/ErrorPage";
 import handleLogOut from "./components/handleLogOut";
 import useUsername from "./components/SignIn/useUsername";
@@ -14,9 +14,25 @@ function App() {
 	const { setUserToken, removeUserToken, getuserToken } = useToken();
 	const [page, setPage] = useState("None");
 
+	const {
+		startConnectBeating,
+		checkConnectHeartBeating,
+		halt,
+		startBattleBeating,
+	} = heart(setPage);
+
+	useEffect(() => {
+		if (page != "Login") {
+			const userToken = getuserToken();
+			if (userToken) {
+				// console.log("Starting Heart Beat", userToken);
+				startConnectBeating(userToken);
+			}
+		}
+	}, [page]);
+
 	const { setUsername, removeUsername, getUsername } = useUsername();
 	const { setPassword, removePassword, getPassword } = usePassword();
-	const { startConnectBeating, checkConnectHeartBeating, halt } = heart();
 
 	const login = (
 		<Login
@@ -40,6 +56,7 @@ function App() {
 
 	//Start heart beat
 	if (!checkConnectHeartBeating()) {
+		// console.log("Starting Heart Beat", userToken);
 		startConnectBeating(userToken);
 	}
 
@@ -54,7 +71,13 @@ function App() {
 		case "Team":
 			return <TeamBuilderPage setPage={setPage} username={username} />;
 		case "Battle":
-			return <BattlePage setPage={setPage} />;
+			return (
+				<BattlePage
+					setPage={setPage}
+					halt={halt}
+					startBattleBeating={startBattleBeating}
+				/>
+			);
 		case "LogOut":
 			halt();
 			handleLogOut({ username, password, setPage });

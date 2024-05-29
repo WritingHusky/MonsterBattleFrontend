@@ -2,6 +2,7 @@ import NavBar from "../components/NavBar";
 import { useEffect, useState } from "react";
 import TeamMonBar from "../components/Team/TeamMonBar";
 import axios from "axios";
+import { CREATE_URL, REQUEST_URL, UPDATE_URL, COUNT_URL } from "../Constants";
 
 interface teamBuilderProps {
 	setPage: React.Dispatch<React.SetStateAction<string>>;
@@ -30,7 +31,7 @@ const TeamBuilder = ({
 	const handleCreateNewTeam = async () => {
 		await axios
 			.post(
-				"http://localhost:8080/api/team/create",
+				CREATE_URL,
 				{ username: username },
 				{
 					headers: { "Content-Type": "application/json" },
@@ -57,7 +58,7 @@ const TeamBuilder = ({
 	const requestData = async () => {
 		await axios
 			.post(
-				"http://localhost:8080/api/team/request",
+				REQUEST_URL,
 				{ username: username }, // Pass just the inner object
 				{
 					headers: { "Content-Type": "application/json" },
@@ -84,7 +85,7 @@ const TeamBuilder = ({
 		const data = { username, team };
 		// Must build out team
 		await axios
-			.post("http://localhost:8080/api/team/update", JSON.stringify(data), {
+			.post(UPDATE_URL, JSON.stringify(data), {
 				headers: { "Content-Type": "application/json" },
 			})
 			.then((res) => {
@@ -106,7 +107,7 @@ const TeamBuilder = ({
 		requestData();
 		// Must build out team
 		axios
-			.get("http://localhost:8080/api/monster/count", {
+			.get(COUNT_URL, {
 				headers: { "Content-Type": "application/json" },
 			})
 			.then((res) => {

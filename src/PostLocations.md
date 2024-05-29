@@ -1,0 +1,27 @@
+# List of the locations of HTTP requests in the code.
+
+- Team Builder Page
+  - handleCreateNewTeam
+  - requestData
+  - updateTeam
+  - useEffect (mount)
+- Main page
+  - remove battleId
+- Results Window
+  - requestTIP
+- Heart
+  - sendPingToConnect
+  - sendPingToBattle
+- Handle Log Out
+- Team Mon Bar
+  - retreiveMonInfo
+- SignUpWindow
+  - handleSubmit
+- SignInWindow
+  - handleSubmit
+- useInteractionHandler
+  - handleMoveSubmit
+- Textlog
+  - getLog
+- newFightWindow
+  - requestTIP
