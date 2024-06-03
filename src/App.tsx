@@ -46,6 +46,7 @@ function App() {
 	// If the user has no token then get them to sign in
 	const userToken = getuserToken();
 	if (!userToken) {
+		console.log("No Token");
 		return login;
 	}
 

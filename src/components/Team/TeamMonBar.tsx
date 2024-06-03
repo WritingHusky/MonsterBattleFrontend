@@ -23,7 +23,7 @@ interface MonBarProps {
 // I hope this page doesn't re-render to many times
 const TeamMonBar = ({ dexId }: MonBarProps) => {
 	const [monster, setMonster] = useState<Monster>();
-	var isSet = false;
+	// var isSet = false;
 
 	// The method to update the infomation about a monster
 	const retreiveMonInfo = async () => {
@@ -34,7 +34,7 @@ const TeamMonBar = ({ dexId }: MonBarProps) => {
 			.then((res) => {
 				// console.log(res.data);
 				setMonster(res.data);
-				isSet = true;
+				// isSet = true;
 			})
 			.catch((error) => {
 				if (error.response) {
@@ -66,7 +66,7 @@ const TeamMonBar = ({ dexId }: MonBarProps) => {
 					{/* <button onClick={updateTeam}>Change Monster</button> */}
 				</>
 			) : (
-				<>asdf</>
+				<>Loading...</>
 			)}
 		</>
 	);

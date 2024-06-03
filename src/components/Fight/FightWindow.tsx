@@ -272,7 +272,7 @@ const FightWindow = ({ setWindow }: NewFightWindowProps) => {
 					if (repeat) {
 						// console.log("Repeating Inquiry"); // Debugging
 						// Wait for 1 second before sending the next inquiry
-						setTimeout(() => inquiryCycle(), 2000);
+						setTimeout(() => inquiryCycle(), 2500);
 					} else {
 						// console.log("Inquiry Cycle Complete"); // Debugging
 					}
@@ -322,7 +322,7 @@ const FightWindow = ({ setWindow }: NewFightWindowProps) => {
 						case "TIP: Paused (Self)": // The user has a dead monster
 							// When it's paused by the user, we should be in the monster state
 							if (interactionState != "Monster") {
-								// console.log("Paused (Self) and setting to Monster");
+								console.log("Paused (Self) and setting to Monster");
 								setInteractionState("Monster");
 							}
 							return false;
